@@ -1,0 +1,30 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: unzip -q ./*.zip
+      - name: Add font if provided
+        run: |
+          if [ -f fixedsys.ttf ]; then
+            cp fixedsys.ttf All-Seeking-AI/app/src/main/assets/fonts/fixedsys.ttf
+          fi
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Build
+        run: gradle assembleDebug --no-daemon
+        working-directory: All-Seeking-AI
+      - uses: actions/upload-artifact@v4
+        with:
+          name: All-Seeking-AI-apk
+          path: All-Seeking-AI/app/build/outputs/apk/debug/app-debug.apk
